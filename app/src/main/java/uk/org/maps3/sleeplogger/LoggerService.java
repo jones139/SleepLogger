@@ -1,5 +1,6 @@
 package uk.org.maps3.sleeplogger;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,19 +25,26 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
+interface SleepLoggerListener {
+    void onSleepLoggerStatusChanged(int type, int data, String msg);
+}
+
+
 public class LoggerService extends Service implements BleHrmMonitorListener {
+    public final static int TYPE_DATA = 1;   // A message containing HRM data
+    public final static int TYPE_CONNECTION = 2;  // A message describing the connection state.
+    public final static int TYPE_READY = 3;       // A message saying the device is ready (HRM service discovered).
     private final String TAG = "LoggerService";
-    private String mHrmAddr = null;
-    private String mHrmName = null;
+    private final int NOTIFICATION_ID = 1;
+    private final IBinder mBinder = new LocalBinder();
     public boolean mConnected = false;
     public boolean mReady = false;
     public int mHR = 0;
-
+    //public Array<int> mHRArray;
+    private String mHrmAddr = null;
+    private String mHrmName = null;
+    private SleepLoggerListener mCallback = null;
     private BleHrmMonitor mBleHrmMonitor;
-
-    private final int NOTIFICATION_ID = 1;
-
-    private final IBinder mBinder = new LocalBinder();
 
 
     public LoggerService() {
@@ -84,17 +92,17 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
     public void onDestroy() {
         Log.v(TAG,"onDestroy()");
         /* Cancel notification */
-        Log.v(TAG,"onDestroy(): cancelling notification");
+        Log.v(TAG, "onDestroy(): cancelling notification");
         NotificationManager nM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nM.cancel(NOTIFICATION_ID);
+        mBleHrmMonitor.stop();
 
         super.onDestroy();
     }
 
-    public class LocalBinder extends Binder {
-        public LoggerService getService() {
-            return LoggerService.this;
-        }
+    public void setCallback(SleepLoggerListener callback) {
+        Log.v(TAG, "setCallback()");
+        mCallback = callback;
     }
 
     @Override
@@ -109,6 +117,7 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         if (type==BleHrmMonitor.TYPE_CONNECTION) {
             mConnected = (data!=0);
             Log.v(TAG,"mConnected = "+mConnected);
+            mCallback.onSleepLoggerStatusChanged(TYPE_CONNECTION, data, "Connected = " + data);
         }
         else if (type==BleHrmMonitor.TYPE_READY) {
             mReady = (data!=0);
@@ -117,6 +126,7 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         else if (type==BleHrmMonitor.TYPE_DATA) {
             mHR = data;
             Log.v(TAG,"mHR = "+mHR);
+            mCallback.onSleepLoggerStatusChanged(TYPE_DATA, mHR, "heart rate = " + mHR);
 
         }
     }
@@ -129,6 +139,12 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         Log.v(TAG,"mHrmAddr = "+mHrmAddr);
         Log.v(TAG, "mHrmName = " + mHrmName);
 
+    }
+
+    public class LocalBinder extends Binder {
+        public LoggerService getService() {
+            return LoggerService.this;
+        }
     }
 
 }
