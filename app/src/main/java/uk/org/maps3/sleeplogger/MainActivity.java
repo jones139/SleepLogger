@@ -194,6 +194,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 i = new Intent(this, SettingsActivity.class);
                 startActivity(i);
                 return true;
+            case R.id.action_about:
+                Log.v(TAG, "action_about");
+                i = new Intent(this, AboutActivity.class);
+                startActivity(i);
+                return true;
             case R.id.action_selectHrm:
                 Log.v(TAG, "action_selectHrm");
                 i = new Intent(this, HrmPicker.class);
