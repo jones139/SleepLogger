@@ -67,8 +67,11 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         /**
          * Show a notification while this service is running.
          */
+        Intent i = new Intent(this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+                i, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 this);
         Notification notification = builder.setContentIntent(contentIntent)
@@ -116,8 +119,9 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         Log.v(TAG,"onBleHrmDataReceived - msg="+msg);
         if (type==BleHrmMonitor.TYPE_CONNECTION) {
             mConnected = (data!=0);
-            Log.v(TAG,"mConnected = "+mConnected);
-            mCallback.onSleepLoggerStatusChanged(TYPE_CONNECTION, data, "Connected = " + data);
+            Log.v(TAG, "mConnected = " + mConnected);
+            if (mCallback != null)
+                mCallback.onSleepLoggerStatusChanged(TYPE_CONNECTION, data, "Connected = " + data);
         }
         else if (type==BleHrmMonitor.TYPE_READY) {
             mReady = (data!=0);
@@ -125,9 +129,9 @@ public class LoggerService extends Service implements BleHrmMonitorListener {
         }
         else if (type==BleHrmMonitor.TYPE_DATA) {
             mHR = data;
-            Log.v(TAG,"mHR = "+mHR);
-            mCallback.onSleepLoggerStatusChanged(TYPE_DATA, mHR, "heart rate = " + mHR);
-
+            Log.v(TAG, "mHR = " + mHR);
+            if (mCallback != null)
+                mCallback.onSleepLoggerStatusChanged(TYPE_DATA, mHR, "heart rate = " + mHR);
         }
     }
 

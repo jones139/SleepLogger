@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="EnableHrm"
+        android:summary="Requires Android 4.3 or Higher"
+        android:title="Enable Heart Rate Monitor"
+        android:defaultValue="true" />
+
+</PreferenceScreen>

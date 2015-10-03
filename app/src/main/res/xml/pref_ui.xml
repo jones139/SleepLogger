@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- A 'parent' preference, which enables/disables child preferences (below)
+         when checked/unchecked. -->
+    <EditTextPreference
+        android:defaultValue="1000"
+        android:key="UiUpdatePeriod"
+        android:title="Update Period (ms)" />
+
+
+</PreferenceScreen>
