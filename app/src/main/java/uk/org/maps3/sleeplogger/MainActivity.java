@@ -260,6 +260,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void updateUi() {
         Log.v(TAG, "updateUi()");
+        // We need to use runonUiThread because timertask runs on a different thread so throws an exception
+        // if we access UI components directly.
+        MainActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+                TextView tv = (TextView) findViewById(R.id.updateUiText);
+                String valStr = tv.getText().toString();
+                int val = -1;
+                try {
+                    val = Integer.parseInt(valStr);
+                } catch (Exception e) {
+                    Log.v(TAG, "Error Parsing updateUiText" + e.toString());
+                }
+                val = val + 1;
+                tv.setText(Integer.toString(val));
+
+            }
+        });
+
     }
 
     /**
